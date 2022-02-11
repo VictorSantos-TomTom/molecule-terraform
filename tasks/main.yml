@@ -1,0 +1,6 @@
+---
+# tasks file for teste01
+
+- debug: 
+    msg: "{{ ansible_hostname }}"
+

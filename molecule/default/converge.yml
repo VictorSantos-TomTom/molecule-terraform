@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include vic.teste01"
+      include_role:
+        name: "teste01"

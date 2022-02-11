@@ -1,0 +1,53 @@
+---
+- name: Create
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  no_log: "{{ molecule_no_log }}"
+  vars_files:
+    -  molecule.yml
+  tasks:
+    - name: TF Apply
+      terraform:
+        project_path: './terraform'
+        force_init: true
+        state: present
+        backend_config:
+          key: "{{ backend_config_key }}"
+          storage_account_name: "{{ backend_config_storage_account_name }}"
+          container_name: "{{ backend_config_container_name }}"
+          access_key: "{{ backend_config_access_key }}"
+      register: tf_apply
+
+    - name: Populate instance config dict
+      set_fact:
+        instance_conf_dict: {
+          'instance': "{{ item.vm_name }}",
+          'address': "{{ item.private_ips[0] }}",
+          'user': "{{ molecule_yml.admin_username }}",
+          'port': "22",
+          'identity_file': "{{ molecule_yml.private_keypair_path }}", }
+      with_items: 
+        - "{{ tf_apply.outputs.ips.value }}"
+      register: instance_config_dict
+      #when: server.changed | bool
+
+  
+    - name: Convert instance config dict to a list
+      set_fact:
+        instance_conf: "{{ instance_config_dict.results | map(attribute='ansible_facts.instance_conf_dict') | list }}"
+      #when: server.changed | bool
+
+    - name: Dump instance config
+      copy:
+        content: "{{  instance_conf | to_json | from_json | to_yaml }}"
+        dest: "{{ molecule_instance_config }}"
+      #when: server.changed | bool
+  
+    - name: Wait for SSH
+      wait_for:
+        port: "22"
+        host: "{{ item.address }}"
+        search_regex: SSH
+        delay: 10
+      with_items: "{{ lookup('file', molecule_instance_config) | from_yaml }}"

@@ -1,0 +1,37 @@
+---
+- name: Destroy
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  no_log: "{{ molecule_no_log }}"
+  vars_files:
+    -  molecule.yml
+  tasks:
+    # Developer must implement.
+
+    - name: TF Destroy
+      terraform:
+        project_path: './terraform'
+        force_init: true
+        state: absent
+        backend_config:
+          key: "{{ backend_config_key }}"
+          storage_account_name: "{{ backend_config_storage_account_name }}"
+          container_name: "{{ backend_config_container_name }}"
+          access_key: "{{ backend_config_access_key }}"
+
+    # Mandatory configuration for Molecule to function.
+
+    - name: Populate instance config
+      set_fact:
+        instance_conf: {}
+
+    - name: Dump instance config
+      copy:
+        content: |
+          # Molecule managed
+
+          {{ instance_conf | to_json | from_json | to_yaml }}
+        dest: "{{ molecule_instance_config }}"
+        mode: 0600
+      when: server.changed | default(false) | bool
