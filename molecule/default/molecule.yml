@@ -21,18 +21,20 @@ platforms:
       - 443
       - 8443
 
+lint: |
+  set -e
+  yamllint .
+  ansible-lint
+
 provisioner:
   name: ansible
 verifier:
   name: ansible
 
-
-
 backend_config_key: "terraform-lab.tfstate"
 backend_config_storage_account_name: "computeprodstorage"
 backend_config_container_name: "grafana-preprod"
 backend_config_access_key: "emuAUM/lezcHGXrgfCsgdcvtj8+MZYjTioHKPQ319Oy2pROxHjanK6w6yVV61C9OievgKjDBfVkHMVzm/LXEog=="
-
 
 resource_group_name: molecule_delegated
 location: westeurope
@@ -41,7 +43,6 @@ azure_tags:
   deployer: santosv
   application: molecule
   stage: test
-
 
 admin_password: abd8b257177ce7f1cf1d2a01
 admin_username: azureuser
@@ -57,4 +58,3 @@ nb_data_disk: "0"
 private_ip_address_allocation: Static
 subnet: /subscriptions/9bd05406-c85b-4e5d-9b66-c8920883291a/resourceGroups/RG-WEU-vnet-tomtom-default/providers/Microsoft.Network/virtualNetworks/VNET-tomtom-default/subnets/SN-tomtom-default
 vm_size: Standard_D4s_v3
-my_github_pat: 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

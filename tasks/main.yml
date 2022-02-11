@@ -2,5 +2,5 @@
 # tasks file for teste01
 
 - debug: 
-    msg: "{{ ansible_hostname }}"
+    msg:    "{{ ansible_hostname }}"
 
